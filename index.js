@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 
 const app = express();
@@ -24,6 +24,55 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
+
+    const carCollection = client.db('carsDB').collection('cars');
+
+        
+    app.get('/cars', async(req, res)=> {
+      const cursor = carCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+
+    app.get('/cars/:id', async(req, res)=> {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await carCollection.findOne(query)
+      res.send(result);
+    });
+
+    app.listen(port, ()=> {
+      console.log(`http://localhost:${port}/`);
+    });
+
+    app.put('/cars/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = {_id: new ObjectId(id)}
+      const options = {upsert: true}
+      const updatedCar = req.body;
+
+      const setCar = {
+        $set: {
+          name: updatedCar.name,
+          price: updatedCar.price,
+          brand: updatedCar.brand,
+          model: updatedCar.model,
+          image: updatedCar.image,
+          rating: updatedCar.rating,
+          description: updatedCar.description,
+        }
+      }
+      const result = await carCollection.updateOne(filter, setCar, options);
+      res.send(result);
+    })
+
+    app.post('/cars', async(req, res)=>{
+      const newCar = req.body;
+      const result = await carCollection.insertOne(newCar);
+      res.send(result);
+    })    
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
