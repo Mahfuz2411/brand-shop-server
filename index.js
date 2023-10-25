@@ -26,12 +26,16 @@ async function run() {
     await client.connect();
 
     const carCollection = client.db('carsDB').collection('cars');
+    const cartCollection = client.db("carsDB").collection("cart");
 
+    app.get("/", async (req, res) => {
+      res.send("Sweet Home");
+    });
         
     app.get('/cars', async(req, res)=> {
       const cursor = carCollection.find();
       const result = await cursor.toArray();
-      res.send(result);
+      res.send(result );
     });
 
 
@@ -39,7 +43,24 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) }
       const result = await carCollection.findOne(query)
-      res.send(result);
+      res.send(result || "{}");
+    });
+    
+
+    app.get("/cartlist/:email", async (req, res) => {
+      const email = req.params.email;
+      console.log(email);
+      const result = await cartCollection.find({ email }).toArray();
+      console.log(result);
+      res.send(result ||"[]");
+    });
+
+    app.post("/cartlist", async (req, res) => {
+      const data = req.body;
+      // const email = req.params.email;
+      const result = await cartCollection.insertOne(data);
+      console.log(result);
+      res.send(result.acknowledged);
     });
 
     app.listen(port, ()=> {
