@@ -9,10 +9,7 @@ const port = process.env.PORT || 5000;
 app.use(cors())
 app.use(express.json());
 
-
-
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.tp1f27h.mongodb.net/?retryWrites=true&w=majority`;
-
 
 const client = new MongoClient(uri, {
   serverApi: {
@@ -21,6 +18,7 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   }
 });
+
 async function run() {
   try {
     await client.connect();
@@ -37,14 +35,12 @@ async function run() {
       res.send(result );
     });
 
-
     app.get('/cars/:id', async(req, res)=> {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) }
       const result = await carCollection.findOne(query)
       res.send(result || "{}");
     });
-    
 
     app.get("/cartlist/:email", async (req, res) => {
       const email = req.params.email;
@@ -82,7 +78,6 @@ async function run() {
       const result = await carCollection.insertOne(newCar);
       res.send(result);
     })
-
     
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
