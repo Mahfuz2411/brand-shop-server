@@ -54,13 +54,7 @@ async function run() {
 
       const setCar = {
         $set: {
-          name: updatedCar.name,
-          price: updatedCar.price,
-          brand: updatedCar.brand,
-          model: updatedCar.model,
-          image: updatedCar.image,
-          rating: updatedCar.rating,
-          description: updatedCar.description,
+          ...updatedCar,
         }
       }
       const result = await carCollection.updateOne(filter, setCar, options);
@@ -71,7 +65,7 @@ async function run() {
       const newCar = req.body;
       const result = await carCollection.insertOne(newCar);
       res.send(result);
-    })    
+    })
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
